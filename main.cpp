@@ -5,27 +5,38 @@
 #include <windows.h>
 #include <cstdlib>
 #include <vector>
+#include <stdio.h>
+
+// Macro definitions
+#define PAGELENGTH 73
 
 using namespace std;
 
 // An enumeration is a user-defined data type that consists of integral constants.
 enum Position { LEFT, CENTER, RIGHT };
-string pageCentering(Position, string, int&);
+
+struct bStruct{
+    vector<string> bulletPoints;
+    int numBulletPoints;
+};
+
+string pageCentering(Position, string);
 int randomizer();
 void formater(string);
 string printTopBorder(int);
 string printBottomBorder(int);
 int decider();
 void menu(int);
-void worldHistory();
-bool bulletPoints();
-bool items();
-bool npcs();
+vector<string> worldHistory();
+vector<string> bulletPoints();
+vector<string> items();
+vector<string> npcs();
+
+
 
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
-    int pageLength = 73;
     // 'file' can be any name. in quotes " " " is the actual file name
     // ios:: executes all 3 at once.
     ofstream file("test.doc", ios::in | ios::out | ios::app);
@@ -41,41 +52,99 @@ int main()
         cout << "Enter the description for that session:" << endl;
         getline(cin, desc);
 
-        menu(decider());
+        int decision = decider();
+        switch (decision)
+        {
+        case 1:
+        {
+            vector<string> finHistVec = worldHistory();
+            string histTitle = finHistVec.at(0);
+            string histDesc = finHistVec.at(1);
+            break;
+        }
+        case 2:
+            bulletPoints();
+            break;
+        case 3:
+            items();
+            break;
+        case 4:
+            npcs();
+            break;
+        default:
+            break;
+        }
+
+        /* Under this is what formats the .doc file*/
 
         // write them to the file, each on a separate line
-        file << setfill('=') << setw(pageLength) << "=" << endl;
-        //string datePrint =  print(CENTER, date, pageLength);
-        file << pageCentering(CENTER, date, pageLength) << endl;
-        //file << datePrint << endl;
-        file << desc << endl;
+        file << setfill('=') << setw(PAGELENGTH) << "=" << endl;
+        file << pageCentering(CENTER, date) << endl;
 
+        file << desc << endl;
         file.close();
     }
     return 0;
 }
-bool bulletPoints()
+
+vector<string> npcs()
 {
 
 }
-bool items()
+vector<string> items()
 {
 
 }
-bool npcs()
+vector<string> bulletPoints()
 {
+    vector<string> bVec;
+    string topBorder = ("◤━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◥");
+    bVec.push_back(topBorder);
 
+    int numBullet;
+    cout << "How many bullet points do you want to make?: ";
+    cin >> numBullet;
+    cin.ignore();
+
+    for (int i = 1; i <= numBullet; i++)
+    {
+        string bulletDesc;
+        cout << "Please enter bullet point #" << i << ": ";
+        getline(cin, bulletDesc);
+        bVec.push_back("▷ " + bulletDesc);
+    }
+
+    string bottomBorder = ("◣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◢");
+    bVec.push_back(bottomBorder);
+
+    numBullet++;
+    for (int i = 0; i <= numBullet; i++)
+    {
+        bStruct.bulletPoints.push_back(bVec.at(i));
+    }
+
+    return bVec;
 }
-void worldHistory()
+vector<string> worldHistory()
 {
-    string worldTitle = "»»———-World History———-««";
+    vector<string> hVec;
+    string wordTitle = ("»»———-World History———-««");
+    string centeredTitle = pageCentering(CENTER, wordTitle);
+    hVec.push_back(centeredTitle);
+
     string worldDesc;
     cout << "Please enter notes about the world history:" << endl;
     getline(cin, worldDesc);
+    hVec.push_back(worldDesc);
 
+    cout << "printing tests:\n";
+    cout << hVec.at(0) << endl;
+    cout << hVec.at(1) << endl;
+
+    return hVec;
 }
 
-void menu(int choice)
+/*void menu(int choice)
 {
     switch (choice)
     {
@@ -94,7 +163,8 @@ void menu(int choice)
     default:
         break;
     }
-}
+}*/
+
 int decider()
 {
     char yesNo;
@@ -130,14 +200,14 @@ int decider()
     }
     return option;
 }
-string pageCentering(Position pos, string s, int &pageLength)
+string pageCentering(Position pos, string s)
 {
     string dateCentered = s;
     int spaces = 0;
     switch (pos)
     {
-        case CENTER: spaces = (pageLength - s.size()) / 2; break;
-        case RIGHT: spaces = (pageLength - s.size()); break;
+        case CENTER: spaces = (PAGELENGTH - s.size()) / 2; break;
+        case RIGHT: spaces = (PAGELENGTH - s.size()); break;
     }
     return string(spaces, ' ') + dateCentered;
 }
