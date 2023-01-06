@@ -1,3 +1,7 @@
+/*
+This program combines functions, vectors, structures, enumeration, loops, and cases to produce a program
+meant for recording modular notes for Dungeons and Dragons.
+*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -14,28 +18,25 @@ using namespace std;
 
 // An enumeration is a user-defined data type that consists of integral constants.
 enum Position { LEFT, CENTER, RIGHT };
+struct bStruct{ vector<string> bulletPoints; int numBulletPoints;};
+struct iStruct{ vector<string> iNameAndDesc; vector<string> iUpdates; int numItems; int numIUpdates;};
+struct nStruct{ vector<string> nNameAndDesc; int numNPCs;};
 
-struct bStruct{
-    vector<string> bulletPoints;
-    int numBulletPoints;
-};
-
+vector<string> worldHistory();
 string pageCentering(Position, string);
-int randomizer();
-void formater(string);
 string printTopBorder(int);
 string printBottomBorder(int);
-int decider();
 void menu(int);
-vector<string> worldHistory();
-vector<string> bulletPoints();
-vector<string> items();
-vector<string> npcs();
-
-
+void formater(string);
+int decider(char);
+int randomizer();
+bStruct bulletPoints();
+iStruct items();
+nStruct npcs();
 
 int main()
 {
+    bStruct b_struct;
     SetConsoleOutputCP(CP_UTF8);
     // 'file' can be any name. in quotes " " " is the actual file name
     // ios:: executes all 3 at once.
@@ -52,50 +53,205 @@ int main()
         cout << "Enter the description for that session:" << endl;
         getline(cin, desc);
 
-        int decision = decider();
-        switch (decision)
-        {
-        case 1:
-        {
-            vector<string> finHistVec = worldHistory();
-            string histTitle = finHistVec.at(0);
-            string histDesc = finHistVec.at(1);
-            break;
-        }
-        case 2:
-            bulletPoints();
-            break;
-        case 3:
-            items();
-            break;
-        case 4:
-            npcs();
-            break;
-        default:
-            break;
-        }
-
-        /* Under this is what formats the .doc file*/
-
-        // write them to the file, each on a separate line
-        file << setfill('=') << setw(PAGELENGTH) << "=" << endl;
+        int randNum = randomizer();
+        file << printTopBorder(randNum) << endl;
         file << pageCentering(CENTER, date) << endl;
+        string dateBorder = "──────────────────";
+        file << pageCentering(CENTER,dateBorder) << endl;
+        file << "»»------► " << desc << endl;
 
-        file << desc << endl;
-        file.close();
+
+        char yesNo;
+        cout << "Any additional notes (Y/N)?: ";
+        cin >> yesNo;
+        char again = 'A';
+        while (again == 'A' || again == 'a')
+        {
+            int decision = decider(yesNo);
+            switch (decision)
+            {
+            case 1:
+            {
+                vector<string> finHistVec = worldHistory();
+                file << finHistVec.at(0) << endl;
+                file << finHistVec.at(1) << endl;
+                break;
+            }
+            case 2:
+            {
+                bStruct mainPoint = bulletPoints();
+                for (int i = 0; i <= mainPoint.numBulletPoints; i++)
+                {
+                    file << mainPoint.bulletPoints.at(i) << endl;
+                }
+                break;
+            }
+            case 3:
+            {
+                iStruct mainItems = items();
+                for (int i = 0; i <= mainItems.numItems; i++)
+                {
+                    file << mainItems.iNameAndDesc.at(i) << endl;
+                }
+                if(mainItems.iUpdates.empty())
+                    break;
+                if(!mainItems.iUpdates.empty())
+                {
+                    for (int i = 0; i <= mainItems.numIUpdates; i++)
+                    {
+                        file << mainItems.iUpdates.at(i) << endl;
+                    }
+                }
+                break;
+            }
+            case 4:
+            {
+                nStruct mainNPCs = npcs();
+                for (int i = 0; i <= mainNPCs.numNPCs; i++)
+                {
+                    file << mainNPCs.nNameAndDesc.at(i) << endl;
+                }
+                break;
+            }
+            default:
+                cout << "Error. Skipping notes.\n";
+                break;
+            }
+            cout << "Press A to add more notes, or press a random key to continue.\n";
+            cin >> again;
+            cin.ignore();
+            }
+        file << printBottomBorder(randNum) << endl;
     }
     return 0;
 }
 
-vector<string> npcs()
+nStruct npcs()
 {
+    vector<string> nVec;
+    string bullPointSeparator = ("••●••");
+    nVec.push_back(pageCentering(CENTER, bullPointSeparator));
+    string npcTitle = ("NPCs");
+    nVec.push_back(pageCentering(CENTER, npcTitle));
+    string smallBorder = ("───────────");
+    nVec.push_back(pageCentering(CENTER, smallBorder));
 
+    int numOfNPCs;
+    cout << "How many NPCs do you want to make?: ";
+    cin >> numOfNPCs;
+    cin.ignore();
+
+    for (int i = 1; i <= numOfNPCs; i++)
+    {
+        string npcName, npcDesc;
+        cout << "Please enter the name of NPC #" << i << ", press enter, followed with a description:\n";
+        getline(cin, npcName);
+        getline(cin, npcDesc);
+        nVec.push_back("╰─▸ ❝ @[" + npcName + "]- " + npcDesc);
+    }
+
+    nStruct n_struct;
+    int x = (numOfNPCs+2);
+    n_struct.numNPCs = x;
+    for (int i = 0; i <= x; i++)
+    {
+        n_struct.nNameAndDesc.push_back(nVec.at(i));
+    }
+
+    for (int i = 0; i <= x; i++)
+    {
+        cout << n_struct.nNameAndDesc.at(i) << endl;
+    }
+    cout << "current num of npcs: " << x << endl;
+    return n_struct;
 }
-vector<string> items()
+
+iStruct items()
 {
+    vector<string> iVec;
+    string bullPointSeparator = ("••●••");
+    iVec.push_back(pageCentering(CENTER, bullPointSeparator));
+    string itemTitle = ("... [Items] ◌ೄ");
+    iVec.push_back(pageCentering(CENTER, itemTitle));
 
+    int numOfItems;
+    cout << "How many items do you want to make?: ";
+    cin >> numOfItems;
+    cin.ignore();
+
+    for (int i = 1; i <= numOfItems; i++)
+    {
+        string itemName;
+        cout << "Please enter the name of item #" << i << ": ";
+        getline(cin, itemName);
+        iVec.push_back("• • •  " + itemName);
+
+        string itemDesc;
+        cout << "Please enter a short description for item #" << i << ": ";
+        getline(cin, itemDesc);
+        iVec.push_back("	○ " + itemDesc);
+    }
+
+    iStruct i_struct;
+    int x = (numOfItems*2+1);
+    i_struct.numItems = x;
+    for (int i = 0; i <= x; i++)
+    {
+        i_struct.iNameAndDesc.push_back(iVec.at(i));
+    }
+
+    for (int i = 0; i <= x; i++)
+    {
+        cout << i_struct.iNameAndDesc.at(i) << endl;
+    }
+    cout << "current num of items: " << x << endl;
+
+    char yesNo;
+    int itemUpdateCount;
+    vector<string> itemUpdateVec;
+
+    char retry = 'T';
+    while (retry == 'T' || retry == 't')
+    {
+        cout << "Are there any updates to include for the items? (Y/N): ";
+        cin >> yesNo;
+        char Y, y, N, n;
+        if (yesNo == 'Y' || yesNo == 'y')
+        {
+            string itemUpdateTitle = ("⇘ : : @[Item Updates]");
+            itemUpdateVec.push_back(itemUpdateTitle);
+            cout << "How many updates do you wish to add?: ";
+            cin >> itemUpdateCount;
+            cin.ignore();
+            for (int i = 1; i <= itemUpdateCount; i++)
+            {
+                string itemUpdate;
+                cout << "Please enter the item name with the update for update #" << i << ": ";
+                getline(cin, itemUpdate);
+                itemUpdateVec.push_back("▷ " + itemUpdate);
+            }
+
+            int y = itemUpdateCount;
+            i_struct.numIUpdates = y;
+            for (int i = 0; i <= itemUpdateCount; i++)
+                i_struct.iUpdates.push_back(itemUpdateVec.at(i));
+            break;
+        }
+        else if ( yesNo == 'N' || yesNo == 'n')
+        {
+            cout << "Skipping item updates.\n";
+            break;
+        }
+        else
+            cout << "Invalid input.\n";
+            cout << "Enter a random letter to skip or T to try again: ";
+            cin >> retry;
+    }
+
+    return i_struct;
 }
-vector<string> bulletPoints()
+
+bStruct bulletPoints()
 {
     vector<string> bVec;
     string topBorder = ("◤━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◥");
@@ -117,14 +273,22 @@ vector<string> bulletPoints()
     string bottomBorder = ("◣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◢");
     bVec.push_back(bottomBorder);
 
-    numBullet++;
+    bStruct b_struct;
+    b_struct.numBulletPoints = ++numBullet;
     for (int i = 0; i <= numBullet; i++)
     {
-        bStruct.bulletPoints.push_back(bVec.at(i));
+        b_struct.bulletPoints.push_back(bVec.at(i));
     }
 
-    return bVec;
+    for (int i = 0; i <= numBullet; i++)
+    {
+        cout << b_struct.bulletPoints.at(i) << endl;
+    }
+    cout << "current bullet point: " << numBullet << endl;
+
+    return b_struct;
 }
+
 vector<string> worldHistory()
 {
     vector<string> hVec;
@@ -144,38 +308,14 @@ vector<string> worldHistory()
     return hVec;
 }
 
-/*void menu(int choice)
+int decider(char answer)
 {
-    switch (choice)
-    {
-    case 1:
-        worldHistory();
-        break;
-    case 2:
-        bulletPoints();
-        break;
-    case 3:
-        items();
-        break;
-    case 4:
-        npcs();
-        break;
-    default:
-        break;
-    }
-}*/
-
-int decider()
-{
-    char yesNo;
     int option;
     char retry = 'T';
     while (retry == 'T' || retry == 't')
     {
-        cout << "Any additional notes (Y/N)?: ";
-        cin >> yesNo;
         char Y, y, N, n;
-        if (yesNo == 'Y' || yesNo == 'y')
+        if (answer == 'Y' || answer == 'y')
         {
             while (option > 4 || option <= 0)
             {
@@ -188,7 +328,7 @@ int decider()
             }
             break;
         }
-        else if ( yesNo == 'N' || yesNo == 'n')
+        else if ( answer == 'N' || answer == 'n')
         {
             cout << "Skipping notes.\n";
             break;
@@ -200,6 +340,7 @@ int decider()
     }
     return option;
 }
+
 string pageCentering(Position pos, string s)
 {
     string dateCentered = s;
